@@ -1,27 +1,41 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>Abfallkarte Haßloch</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+// Startpunkt: Haßloch
+const map = L.map('map').setView([49.242, 8.259], 15);
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+// OpenStreetMap Layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+// Marker für eigene Position
+let myMarker = null;
 
-  <div id="map"></div>
+// GPS verfolgen
+if ("geolocation" in navigator) {
+  navigator.geolocation.watchPosition(
+    position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
 
-  <!-- Leaflet -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      if (!myMarker) {
+        myMarker = L.circleMarker([lat, lng], {
+          radius: 8,
+          color: 'blue',
+          fillColor: 'blue',
+          fillOpacity: 0.8
+        }).addTo(map);
 
-  <!-- Deine App -->
-  <script src="app.js"></script>
-
-</body>
-</html>
+        map.setView([lat, lng], 16);
+      } else {
+        myMarker.setLatLng([lat, lng]);
+      }
+    },
+    error => {
+      alert("Standort konnte nicht ermittelt werden.");
+    },
+    {
+      enableHighAccuracy: true
+    }
+  );
+} else {
+  alert("GPS wird von diesem Gerät nicht unterstützt.");
+}
