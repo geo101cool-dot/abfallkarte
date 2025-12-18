@@ -1,56 +1,27 @@
-// 🔥 Firebase Konfiguration (MUSST du einmal anlegen)
-const firebaseConfig = {
-  apiKey: "DEIN_KEY",
-  authDomain: "DEIN_PROJEKT.firebaseapp.com",
-  databaseURL: "https://DEIN_PROJEKT.firebaseio.com",
-  projectId: "DEIN_PROJEKT",
-};
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Abfallkarte Haßloch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-firebase.initializeApp(firebaseConfig);
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
-const db = firebase.database();
-const auth = firebase.auth();
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-// 🔐 Anonym anmelden
-auth.signInAnonymously();
+  <div id="map"></div>
 
-// 🗺️ Karte
-const map = L.map('map').setView([49.242, 8.259], 15);
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
-}).addTo(map);
+  <!-- Deine App -->
+  <script src="app.js"></script>
 
-// 👤 Eigener Marker
-const myMarker = L.circleMarker([0,0], {radius:8, color:'blue'}).addTo(map);
-
-// 👥 Andere Personen
-const userMarkers = {};
-
-// 📍 GPS Tracking
-navigator.geolocation.watchPosition(pos => {
-  const { latitude, longitude } = pos.coords;
-  myMarker.setLatLng([latitude, longitude]);
-
-  const uid = auth.currentUser.uid;
-  db.ref('users/' + uid).set({
-    lat: latitude,
-    lng: longitude
-  });
-});
-
-// 🔄 Andere Nutzer anzeigen
-db.ref('users').on('value', snap => {
-  const users = snap.val() || {};
-  Object.keys(users).forEach(uid => {
-    if (uid === auth.currentUser?.uid) return;
-
-    if (!userMarkers[uid]) {
-      userMarkers[uid] = L.circleMarker([0,0], {
-        radius:8,
-        color:'red'
-      }).addTo(map);
-    }
-    userMarkers[uid].setLatLng([users[uid].lat, users[uid].lng]);
-  });
-});
+</body>
+</html>
